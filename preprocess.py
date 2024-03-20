@@ -73,6 +73,7 @@ import torchvision.transforms as transforms
 
 def default_transformer(size: tuple=(128, 128), mean: list=None, std: list=None):
     e = []
+    e.append(transforms.ToPILImage())
     e.append(transforms.ToTensor())
     e.append(transforms.Resize(size))
     if mean and std:

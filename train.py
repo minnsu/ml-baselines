@@ -1,4 +1,5 @@
 import torch
+import random
 
 class Trainer:
     def __init__(self, model, optimizer, criterion, mode):
@@ -21,11 +22,13 @@ class Trainer:
         
         return correct / total
 
-    def train(self, epochs, dataloader, validloader, verbose=True, print_every=10):
+    def train(self, epochs, dataloader, validloader, augment_transformer=None, augment_ratio=0, verbose=True, print_every=10):
         for epoch in range(1, epochs+1):
             for X, Y in dataloader:
                 self.optimizer.zero_grad()
                 
+                if augment_transformer and augment_ratio > 0 and random.random() < augment_ratio:
+                    X = augment_transformer(X)
                 output = self.model(X)
                 loss = self.criterion(output, Y)
                 loss.backward()
@@ -33,18 +36,19 @@ class Trainer:
                 self.optimizer.step()
             
             if verbose:
-                print(f'\rEpoch {epoch}[{100 * epoch / epochs}]', end='')
+                ratio = int(100 * epoch / epochs)
+                if validloader is not None and self.mode == 'classification' or self.mode == 'cl':
+                    accuracy = 100 * self.validate(validloader)
+                    print(f'\rEpoch {epoch}[{ratio}%] Loss: {loss.item()} Accuracy: {accuracy:.2f}%', end='')
+                else:
+                    print(f'\rEpoch {epoch}[{ratio}%] Loss: {loss.item()}', end='')
                 if epoch % print_every == 0:
-                    if self.mode == 'classification' or self.mode == 'cl':
-                        accuracy = self.validate(validloader)
-                        print(f'\rEpoch {epoch}[{100 * epoch / epochs}] Loss: {loss.item()} Accuracy: {accuracy}')
-                    else:
-                        print(f'\rEpoch {epoch}[{100 * epoch / epochs}] Loss: {loss.item()}')
+                    print('')
 
-    def test(self, dataloader):
+    def test(self, test_dataloader):
         with torch.no_grad():
             ret = []
-            for X in dataloader:
+            for X, Y in test_dataloader:
                 output = self.model(X)
                 
                 if self.mode == 'classification' or self.mode == 'cl':

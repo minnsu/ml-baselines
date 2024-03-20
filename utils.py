@@ -7,9 +7,16 @@ from torch.utils.data import DataLoader, TensorDataset
 
 # Data loader
 def make_dataloader(X: torch.tensor, Y: torch.tensor, batch_size, shuffle=False):
-    dataset = TensorDataset(X, Y)
+    if Y is None:
+        dataset = TensorDataset(X, torch.zeros(X.shape[0]))
+    else:
+        dataset = TensorDataset(X, Y)
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
 
+def train_valid_split(X: torch.tensor, Y: torch.tensor, valid_ratio=0.2):
+    valid_size = int(X.shape[0] * valid_ratio)
+    train_size = X.shape[0] - valid_size
+    return (X[:train_size], Y[:train_size], X[train_size:], Y[train_size:])
 
 # load imageset from path
 def load_imageset(path, transform, max_cnt=None, shuffle=False):
