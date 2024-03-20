@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Numerical analysis
 
-def tabular_analysis(df, drop_na_col=False, drop_na_row=False, drop_outliers=False):
+def tabular_analysis(df):
     # Describe data
     print('--- Describe ---\n', df.describe(), end='\n\n')
 
@@ -26,11 +26,6 @@ def tabular_analysis(df, drop_na_col=False, drop_na_row=False, drop_outliers=Fal
         cnt = len(nan_rows)
         print('NaN exists rows: {} ({}%)'.format(cnt, 100 * cnt / len(df)), end='\n\n')
 
-    if drop_na_row:
-        df = df.dropna(axis=0)
-    if drop_na_col:
-        df = df.dropna(axis=1)
-
     # Outliers analysis
     numericals = df.select_dtypes(exclude=['object']).columns.tolist()
     Q1 = df[numericals].quantile(0.25)
@@ -38,8 +33,6 @@ def tabular_analysis(df, drop_na_col=False, drop_na_row=False, drop_outliers=Fal
     IQR = Q3 - Q1
     outliers = (df[numericals] < (Q1 - 1.5 * IQR)) | (df[numericals] > (Q3 + 1.5 * IQR))
     print('--- Outliers ---\n', outliers.sum(), end='\n\n')
-    if drop_outliers:
-        df = df[~outliers.any(axis=1)]
     
     # Correlation analysis
     print('--- Correlation ---\n', df[numericals].corr(), end='\n\n')

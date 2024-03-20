@@ -3,6 +3,13 @@ import random
 import matplotlib.pyplot as plt
 
 import torch
+from torch.utils.data import DataLoader, TensorDataset
+
+# Data loader
+def make_dataloader(X: torch.tensor, Y: torch.tensor, batch_size, shuffle=False):
+    dataset = TensorDataset(X, Y)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+
 
 # load imageset from path
 def load_imageset(path, transform, max_cnt=None, shuffle=False):
@@ -35,3 +42,9 @@ def load_imageset(path, transform, max_cnt=None, shuffle=False):
 
 
 # Save & Load model
+def save_model(model, path):
+    torch.save(model.state_dict(), path)
+
+def load_model(path):
+    model = torch.load(path)
+    return model
